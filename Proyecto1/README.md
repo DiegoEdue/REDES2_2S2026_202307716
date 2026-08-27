@@ -38,6 +38,10 @@
 
 ![FLSM4](./imgs/flsm4.png)
 
+![FLSM5](./imgs/flsm5.png)
+
+![FLSM6](./imgs/flsm6.png)
+
 #### 2.2.1 Tabla de FLSM
 
 | **IP de Red**  | **Máscara**     | **Wildcard** | **Primer Host** | **Último Host** | **IP Broadcast** |
@@ -582,7 +586,7 @@ DNS para ambos pools: `0.0.0.0`.
 
 ## 7. Configuración de ACLs
 
-### 7.1 ACL VLAN Naranja
+### 7.1 ACL edificio izquierdo
 
 ```bash
 enable
@@ -629,7 +633,7 @@ exit
 do write memory
 ```
 
-### 7.2 ACL VLAN Verde
+### 7.2 ACL edificio derecho
 
 ```bash
 enable
@@ -676,7 +680,7 @@ exit
 do write memory
 ```
 
-### 7.3 ACL VLAN ADMIN
+### 7.3 ACL edificio ADMIN
 
 ```bash
 enable
@@ -684,6 +688,8 @@ configure terminal
 
 ip access-list extended ACL_ADMIN
     ! VLAN ADMIN no tiene restricciones de salida, acceso completo
+    permit udp any any eq 67
+    permit udp any any eq 68
     permit ip 192.188.16.32 0.0.0.7 any
 exit
 
@@ -692,3 +698,35 @@ interface Vlan56
 exit
 do write memory
 ```
+
+## 8. Pruebas
+
+![LACP](./imgs/LACP.png)
+
+![PAGP](./imgs/PAGP.png)
+
+![pingn](./imgs/pingn.png)
+
+![pingv](./imgs/pingv.png)
+
+![pingadmin](./imgs/pingadmin.png)
+
+## 9. Resumen de Comandos
+
+| Comando                              | Propósito                                        |
+| ------------------------------------ | ------------------------------------------------ |
+| `show vlan brief`                    | Ver VLANS y sus puertos.                         |
+| `show interfaces trunk`              | Verificar los enlaces trunk.                     |
+| `show spanning-tree summary`         | Ver el modo STP configurado.                     |
+| `show spanning-tree blockedports`    | Identificar los puertos bloqueados.              |
+| `show interfaces status`             | Identificar puertos en `err-disabled`.           |
+| `show ip protocols`                  | Ver los protocolos y redes anunciadas.           |
+| `show ip ospf neighbor`              | Verificar vecinos OSPF.                          |
+| `show ip route`                      | Consultar toda la tabla de enrutamiento.         |
+| `show ip route ospf`                 | Mostrar únicamente rutas OSPF.                   |
+| `show running-config`                | Revisar la configuración activa.                 |
+| `show etherchannel summary`          | Ver estado de los EtherChannels.                 |
+| `show ip interface brief`            | Ver estado y direcciones IP de interfaces.       |
+| `show access-lists`                  | Mostrar las listas de control de acceso.         |
+| `show vtp status`                    | Ver estado, dominio y modo de VTP.               |
+| `ping`                               | Comprobar conectividad.                          |
