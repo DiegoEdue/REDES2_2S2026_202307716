@@ -2,6 +2,8 @@
 
 ## 1. Topología Completa
 
+![Topologia](./imgs/topologia.png)
+
 ## 2. Cálculos de Subnetting (VLSM/FLSM)
 
 ### 2.1 VLSM
@@ -111,7 +113,7 @@ interface range fa0/3-5
     channel-group 2 mode passive
 exit
 interface range fa0/6-8
-    channel-group 3 mode passive
+    channel-group 4 mode passive
 exit
 interface port-channel 1
     switchport trunk encapsulation dot1q
@@ -121,7 +123,7 @@ interface port-channel 2
     switchport trunk encapsulation dot1q
     switchport mode trunk
 exit
-interface port-channel 3
+interface port-channel 4
     switchport trunk encapsulation dot1q
     switchport mode trunk
 exit
@@ -184,6 +186,68 @@ exit
 interface fa0/4
     switchport mode access
     switchport access vlan 26
+exit
+do write memory
+```
+
+### 3.5 Router (Edificio Izquierdo) - R-IZQ
+
+```bash
+enable
+configure terminal
+hostname R-IZQ
+no ip domain-lookup
+vtp domain chapinred16
+vtp mode client
+vtp password cisco16
+vtp version 2
+spanning-tree mode rapid-pvst
+ip routing
+interface range g1/0/1-3
+    channel-group 3 mode passive
+exit
+interface port-channel 3
+    switchport trunk encapsulation dot1q
+    switchport mode trunk
+exit
+interface range g1/0/4-6
+    channel-group 4 mode active
+exit
+interface port-channel 4
+    switchport trunk encapsulation dot1q
+    switchport mode trunk
+exit
+interface g1/1/1
+    no switchport
+    ip address 10.4.16.1 255.255.255.252
+    no shutdown
+exit
+interface g1/1/2
+    no switchport
+    ip address 10.4.16.5 255.255.255.252
+    no shutdown
+exit
+interface g1/1/3
+    no switchport
+    ip address 10.4.16.9 255.255.255.252
+    no shutdown
+exit
+router ospf 1
+    network 10.4.16.0 0.0.0.3 area 0
+    network 10.4.16.4 0.0.0.3 area 0
+    network 10.4.16.8 0.0.0.3 area 0
+    network 192.188.16.0 0.0.0.7 area 0
+    network 192.188.16.8 0.0.0.7 area 0
+exit
+interface Vlan16
+    ip address 192.188.16.1 255.255.255.248
+    ip helper-address 10.4.16.22
+    no shutdown
+exit
+interface Vlan26
+    ip address 192.188.16.9 255.255.255.248
+    ip helper-address 10.4.16.22
+    no shutdown
 exit
 do write memory
 ```
@@ -338,112 +402,12 @@ exit
 do write memory
 ```
 
-## 5. Configuración de edificio de administración
-
-### 5.1 Router (Edificio Administración 1) - R-ADMIN1
+### 4.6 Router (Edificio Derecho) - R-DER
 
 ```bash
 enable
 configure terminal
-hostname R-ADMIN1
-no ip domain-lookup
-vtp domain chapinred16
-vtp mode client
-vtp password cisco16
-vtp version 2
-spanning-tree mode rapid-pvst
-ip routing
-interface range g1/0/1-3
-    channel-group 3 mode active
-exit
-interface port-channel 3
-    switchport trunk encapsulation dot1q
-    switchport mode trunk
-exit
-interface g1/1/1
-    no switchport
-    ip address 10.4.16.1 255.255.255.252
-    no shutdown
-exit
-interface g1/1/2
-    no switchport
-    ip address 10.4.16.5 255.255.255.252
-    no shutdown
-exit
-interface g1/1/3
-    no switchport
-    ip address 10.4.16.9 255.255.255.252
-    no shutdown
-exit
-router ospf 1
-    network 10.4.16.0 0.0.0.3 area 0
-    network 10.4.16.4 0.0.0.3 area 0
-    network 10.4.16.8 0.0.0.3 area 0
-    network 192.188.16.0 0.0.0.7 area 0
-    network 192.188.16.8 0.0.0.7 area 0
-exit
-interface Vlan16
-    ip address 192.188.16.1 255.255.255.248
-    ip helper-address 10.4.16.22
-    no shutdown
-exit
-interface Vlan26
-    ip address 192.188.16.9 255.255.255.248
-    ip helper-address 10.4.16.22
-    no shutdown
-exit
-do write memory
-```
-
-### 5.2 Router (Edificio Administración 2) - R-ADMIN2
-
-```bash
-enable
-configure terminal
-hostname R-ADMIN2
-no ip domain-lookup
-vtp domain chapinred16
-vtp mode server
-vtp password cisco16
-vtp version 2
-ip routing
-vlan 56
-    name VLAN_ADMIN_EdificioADMIN_202307716
-exit
-interface g1/0/1
-    switchport mode access
-    switchport access vlan 56
-    spanning-tree portfast
-exit
-interface g1/1/1
-    no switchport
-    ip address 10.4.16.10 255.255.255.252
-    no shutdown
-exit
-interface g1/1/2
-    no switchport
-    ip address 10.4.16.13 255.255.255.252
-    no shutdown
-exit
-router ospf 1
-    network 10.4.16.8 0.0.0.3 area 0
-    network 10.4.16.12 0.0.0.3 area 0
-    network 192.188.16.32 0.0.0.7 area 0
-exit
-interface Vlan56
-    ip address 192.188.16.33 255.255.255.248
-    ip helper-address 10.4.16.22
-    no shutdown
-exit
-do write memory
-```
-
-### 5.3 Router (Edificio Administración 3) - R-ADMIN3
-
-```bash
-enable
-configure terminal
-hostname R-ADMIN3
+hostname R-DER
 no ip domain-lookup
 vtp domain chapinred16
 vtp mode client
@@ -493,6 +457,51 @@ exit
 do write memory
 ```
 
+## 5. Configuración de edificio de administración
+
+### 5.1 Router (Edificio Administración) - R-ADMIN
+
+```bash
+enable
+configure terminal
+hostname R-ADMIN
+no ip domain-lookup
+vtp domain chapinred16
+vtp mode server
+vtp password cisco16
+vtp version 2
+ip routing
+vlan 56
+    name VLAN_ADMIN_EdificioADMIN_202307716
+exit
+interface g1/0/1
+    switchport mode access
+    switchport access vlan 56
+    spanning-tree portfast
+exit
+interface g1/1/1
+    no switchport
+    ip address 10.4.16.10 255.255.255.252
+    no shutdown
+exit
+interface g1/1/2
+    no switchport
+    ip address 10.4.16.13 255.255.255.252
+    no shutdown
+exit
+router ospf 1
+    network 10.4.16.8 0.0.0.3 area 0
+    network 10.4.16.12 0.0.0.3 area 0
+    network 192.188.16.32 0.0.0.7 area 0
+exit
+interface Vlan56
+    ip address 192.188.16.33 255.255.255.248
+    ip helper-address 10.4.16.22
+    no shutdown
+exit
+do write memory
+```
+
 ## 6. Configuración de edificio de servidores
 
 ### 6.1 Router (Edificio Servidores) - R-SERVIDORES
@@ -532,6 +541,154 @@ router ospf 1
     network 10.4.16.16 0.0.0.3 area 0
     network 10.4.16.20 0.0.0.3 area 0
     network 10.4.16.24 0.0.0.3 area 0
+exit
+do write memory
+```
+
+### 6.2 Server (Edificio Izquierdo) - S-IZQ
+
+IP estática del servidor:
+
+- IP: `10.4.16.22`
+- Máscara: `255.255.255.252`
+- Gateway: `10.4.16.21`
+
+Pools DHCP:
+
+| Pool | Gateway | IP inicial | Máscara | Máx. |
+| ---------------- | --------------- | --------------- | ----------------- | ---- |
+| VLAN_ADMIN_ADMIN | `192.188.16.33` | `192.188.16.34` | `255.255.255.248` | 6 |
+| VLAN_Naranja_IZQ | `192.188.16.1` | `192.188.16.2` | `255.255.255.248` | 6 |
+| VLAN_Verde_IZQ | `192.188.16.9` | `192.188.16.10` | `255.255.255.248` | 6 |
+
+DNS para ambos pools: `0.0.0.0`.
+
+### 6.3 Server (Edificio Derecho) - S-DER
+
+IP estática del servidor:
+
+- IP: `10.4.16.26`
+- Máscara: `255.255.255.252`
+- Gateway: `10.4.16.25`
+
+Pools DHCP:
+
+| Pool | Gateway | IP inicial | Máscara | Máx. |
+| ---------------- | --------------- | --------------- | ----------------- | ---- |
+| VLAN_Naranja_DER | `192.188.16.17` | `192.188.16.18` | `255.255.255.248` | 6 |
+| VLAN_Verde_IZQ | `192.188.16.25` | `192.188.16.26` | `255.255.255.248` | 6 |
+
+DNS para ambos pools: `0.0.0.0`.
+
+## 7. Configuración de ACLs
+
+### 7.1 ACL VLAN Naranja
+
+```bash
+enable
+configure terminal
+
+ip access-list extended ACL_NARANJA_IZQ
+    ! Permitir DHCP para no romper el delay
+    permit udp any any eq 67
+    permit udp any any eq 68
+    ! Permitir comunicacion con VLAN Naranja del edificio derecho
+    permit ip 192.188.16.0 0.0.0.7 192.188.16.16 0.0.0.7
+    ! Permitir retorno de sesiones iniciadas por ADMIN
+    permit tcp 192.188.16.0 0.0.0.7 192.188.16.32 0.0.0.7 established
+    permit icmp 192.188.16.0 0.0.0.7 192.188.16.32 0.0.0.7 echo-reply
+    ! Bloquear comunicacion hacia VLANs Verdes
+    deny ip 192.188.16.0 0.0.0.7 192.188.16.8 0.0.0.7
+    deny ip 192.188.16.0 0.0.0.7 192.188.16.24 0.0.0.7
+    ! Bloquear inicio de comunicacion hacia VLAN ADMIN
+    deny ip 192.188.16.0 0.0.0.7 192.188.16.32 0.0.0.7
+exit
+
+ip access-list extended ACL_VERDE_IZQ
+    ! Permitir DHCP para no romper el relay
+    permit udp any any eq 67
+    permit udp any any eq 68
+    ! Permitir comunicacion con VLAN Verde del edificio derecho
+    permit ip 192.188.16.8 0.0.0.7 192.188.16.24 0.0.0.7
+    ! Permitir retorno de sesiones iniciadas por ADMIN
+    permit tcp 192.188.16.8 0.0.0.7 192.188.16.32 0.0.0.7 established
+    permit icmp 192.188.16.8 0.0.0.7 192.188.16.32 0.0.0.7 echo-reply
+    ! Bloquear comunicacion hacia VLANs Naranjas
+    deny ip 192.188.16.8 0.0.0.7 192.188.16.0 0.0.0.7
+    deny ip 192.188.16.8 0.0.0.7 192.188.16.16 0.0.0.7
+    ! Bloquear inicio de comunicacion hacia VLAN ADMIN
+    deny ip 192.188.16.8 0.0.0.7 192.188.16.32 0.0.0.7
+exit
+
+interface Vlan16
+    ip access-group ACL_NARANJA_IZQ in
+exit
+interface Vlan26
+    ip access-group ACL_VERDE_IZQ in
+exit
+do write memory
+```
+
+### 7.2 ACL VLAN Verde
+
+```bash
+enable
+configure terminal
+
+ip access-list extended ACL_NARANJA_DER
+    ! Permitir DHCP para no romper el relay
+    permit udp any any eq 67
+    permit udp any any eq 68
+    ! Permitir comunicacion con VLAN Naranja del edificio izquierdo
+    permit ip 192.188.16.16 0.0.0.7 192.188.16.0 0.0.0.7
+    ! Permitir retorno de sesiones iniciadas por ADMIN
+    permit tcp 192.188.16.16 0.0.0.7 192.188.16.32 0.0.0.7 established
+    permit icmp 192.188.16.16 0.0.0.7 192.188.16.32 0.0.0.7 echo-reply
+    ! Bloquear comunicacion hacia VLANs Verdes
+    deny ip 192.188.16.16 0.0.0.7 192.188.16.8 0.0.0.7
+    deny ip 192.188.16.16 0.0.0.7 192.188.16.24 0.0.0.7
+    ! Bloquear inicio de comunicacion hacia VLAN ADMIN
+    deny ip 192.188.16.16 0.0.0.7 192.188.16.32 0.0.0.7
+exit
+
+ip access-list extended ACL_VERDE_DER
+    ! Permitir DHCP para no romper el relay
+    permit udp any any eq 67
+    permit udp any any eq 68
+    ! Permitir comunicacion con VLAN Verde del edificio izquierdo
+    permit ip 192.188.16.24 0.0.0.7 192.188.16.8 0.0.0.7
+    ! Permitir retorno de sesiones iniciadas por ADMIN
+    permit tcp 192.188.16.24 0.0.0.7 192.188.16.32 0.0.0.7 established
+    permit icmp 192.188.16.24 0.0.0.7 192.188.16.32 0.0.0.7 echo-reply
+    ! Bloquear comunicacion hacia VLANs Naranjas
+    deny ip 192.188.16.24 0.0.0.7 192.188.16.0 0.0.0.7
+    deny ip 192.188.16.24 0.0.0.7 192.188.16.16 0.0.0.7
+    ! Bloquear inicio de comunicacion hacia VLAN ADMIN
+    deny ip 192.188.16.24 0.0.0.7 192.188.16.32 0.0.0.7
+exit
+
+interface Vlan36
+    ip access-group ACL_NARANJA_DER in
+exit
+interface Vlan46
+    ip access-group ACL_VERDE_DER in
+exit
+do write memory
+```
+
+### 7.3 ACL VLAN ADMIN
+
+```bash
+enable
+configure terminal
+
+ip access-list extended ACL_ADMIN
+    ! VLAN ADMIN no tiene restricciones de salida, acceso completo
+    permit ip 192.188.16.32 0.0.0.7 any
+exit
+
+interface Vlan56
+    ip access-group ACL_ADMIN in
 exit
 do write memory
 ```
