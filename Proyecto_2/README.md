@@ -10,7 +10,6 @@
 
 ![topologia](./imgs/topologia_draw.svg)
 
-
 ## 2. Cálculos de Subnetting (VLSM/FLSM)
 
 ### 2.1 VLSM
