@@ -2,7 +2,14 @@
 
 ## 1. Topología Completa
 
+### Topología en Packet Tracer
+
 ![topologia](./imgs/topologia.png)
+
+### Topología en drawio
+
+![topologia](./imgs/topologia_draw.svg)
+
 
 ## 2. Cálculos de Subnetting (VLSM/FLSM)
 
